@@ -26,7 +26,8 @@ def fetchPluginData(pid):
 		pluginUid = long(cur[0][0])
 		pluginFolder = urllib.unquote_plus(cur[0][1])
 		path = webBasePath + '/' + str(pluginUid) + '/' + pluginFolder
-		return path, cur[0][2]
+		git = urllib.unquote_plus(cur[0][2].encode('utf-8'))
+		return path, git
 	except:
 		print 'System Error: Failed to get plugin information'
 		return False
@@ -40,10 +41,10 @@ def getGittingPid():
 		print 'Failed to connect mySQL...'
 		return False
 	try:
-		cursor.execute('SELECT min(`pid`) FROM `plugin` WHERE `status` = 2 LIMIT 0, 1')
+		cursor.execute('SELECT min(`pid`) FROM `plugin` WHERE `gitStatus` = 2 LIMIT 0, 1')
 		cur = cursor.fetchall()
 		pid = long(cur[0][0])
-		return cid
+		return pid
 	except:
 		print 'No gitting mission'
 		return False
@@ -93,7 +94,7 @@ def getMissionCid():
 		return False
 	conn.close()
 
-def changeStatus(table, key, keyId, status):
+def changeStatus(table, key, keyId, statusKey, status):
 	try:
 		conn = connect()
 		cursor = conn.cursor()
@@ -101,12 +102,12 @@ def changeStatus(table, key, keyId, status):
 		print 'Failed to connect mySQL...'
 		return False
 	try:
-		cursor.execute('UPDATE `%s` SET `status` = %d WHERE `%s` = %d' % (table, status, key, keyId))
+		cursor.execute('UPDATE `%s` SET `%s` = %d WHERE `%s` = %d' % (table, statusKey, status, key, keyId))
 		conn.commit()
 		return True
 	except:
 		conn.rollback()
-		print 'System Error: Failed to change status = %d of %s = %d in %s' % (status, key, keyId, table)
+		print 'System Error: Failed to change %s = %d of %s = %d in %s' % (statusKey, status, key, keyId, table)
 		return False
 
 def writeResult(cid, result):
